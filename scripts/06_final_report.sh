@@ -1412,6 +1412,13 @@ if is_profile_active "neo4j"; then
   echo "  Authorization Header Value (for 'Authorization: Basic <value>'): \$(echo -n \"${NEO4J_AUTH_USERNAME:-neo4j}:${NEO4J_AUTH_PASSWORD}\" | base64)"
 fi
 
+if is_profile_active "graphiti"; then
+  echo
+  echo "================================= Graphiti ================================"
+  echo
+  echo "Host: ${GRAPHITI_HOSTNAME:-<hostname_not_set>}"
+fi
+
 # Standalone PostgreSQL (used by n8n, Langfuse, etc.)
 # Check if n8n or langfuse is active, as they use this PostgreSQL instance.
 # The Supabase section already details its own internal Postgres.

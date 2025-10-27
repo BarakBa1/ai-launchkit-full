@@ -315,6 +315,11 @@ https://{$NEO4J_HOSTNAME}:7687 {
     reverse_proxy neo4j:7687
 }
 
+# graphiti
+{$GRAPHITI_HOSTNAME} {
+    reverse_proxy graphiti:8090
+}
+
 # =============================================================================
 # JITSI MEET - Professional Video Conferencing (NO Auth - for meeting guests!)
 # =============================================================================
