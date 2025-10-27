@@ -242,8 +242,8 @@ services:
       - n8n_storage:/home/node/.n8n
       - ./n8n/backup:/backup
       - ./shared:/data/shared
-      - ./media:/data/media      # <-- NEU hinzufügen
-      - ./temp:/data/temp        # <-- NEU hinzufügen
+      - ./media:/data/media # <-- NEU hinzufügen
+      - ./temp:/data/temp # <-- NEU hinzufügen
     depends_on:
       n8n-import:
         condition: service_completed_successfully
@@ -256,8 +256,8 @@ services:
     volumes:
       - n8n_storage:/home/node/.n8n
       - ./shared:/data/shared
-      - ./media:/data/media      # <-- NEU hinzufügen
-      - ./temp:/data/temp        # <-- NEU hinzufügen
+      - ./media:/data/media # <-- NEU hinzufügen
+      - ./temp:/data/temp # <-- NEU hinzufügen
     depends_on:
       n8n:
         condition: service_started
@@ -342,6 +342,22 @@ services:
       nofile:
         soft: 40000
         hard: 40000
+
+  graphiti:
+    image: zepai/graphiti:latest
+    container_name: graphiti
+    profiles: ["graphiti"]
+    restart: unless-stopped
+    ports:
+      - "8090:8000"
+    environment:
+      NEO4J_URI: http://localhost:7474
+      NEO4J_USER: ${NEO4J_AUTH_USERNAME}
+      NEO4J_PASSWORD: ${NEO4J_AUTH_PASSWORD}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    depends_on:
+      neo4j:
+        condition: service_healthy
 
   caddy:
     container_name: caddy
@@ -452,7 +468,7 @@ services:
       options:
         max-size: "1m"
         max-file: "1"
-        
+
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared
@@ -465,7 +481,7 @@ services:
       driver: "json-file"
       options:
         max-size: "1m"
-        max-file: "1"  
+        max-file: "1"
 
   langfuse-worker:
     image: langfuse/langfuse-worker:3
@@ -717,7 +733,8 @@ services:
       redis:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/api/v1/health || exit 1"]
+      test:
+        ["CMD-SHELL", "curl -fsS http://localhost:8080/api/v1/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -734,7 +751,7 @@ services:
       - SEARXNG_BASE_URL=https://${SEARXNG_HOSTNAME:-localhost}/
       - UWSGI_WORKERS=${SEARXNG_UWSGI_WORKERS:-4}
       - UWSGI_THREADS=${SEARXNG_UWSGI_THREADS:-4}
-   # cap_drop:
+    # cap_drop:
     #  - ALL  # Temporarily commented out for first run
     cap_add:
       - CHOWN
@@ -1083,7 +1100,7 @@ services:
     restart: unless-stopped
     volumes:
       - scriberr_data:/app/data
-      - ./shared/audio:/app/data/uploads  # Shared folder for n8n Integration
+      - ./shared/audio:/app/data/uploads # Shared folder for n8n Integration
     environment:
       # Server Configuration
       - HOST=0.0.0.0
@@ -1105,7 +1122,11 @@ services:
       - WHISPER_THREADS=${SCRIBERR_THREADS:-4}
       - BATCH_SIZE=${SCRIBERR_BATCH_SIZE:-16}
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health || wget -q --spider http://localhost:8080 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:8080/api/health || wget -q --spider http://localhost:8080 || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -1189,7 +1210,7 @@ services:
     profiles: ["odoo"]
     restart: unless-stopped
     depends_on:
-      odoo-schema-init:  # Waiting for Schema-Init!
+      odoo-schema-init: # Waiting for Schema-Init!
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
@@ -1332,7 +1353,7 @@ services:
   # ============================================
   # MAUTIC - Marketing Automation Platform
   # ============================================
-  
+
   mautic_db:
     image: mariadb:10.11
     container_name: mautic_db
@@ -1346,7 +1367,11 @@ services:
       - MYSQL_USER=${MAUTIC_DB_USER}
       - MYSQL_PASSWORD=${MAUTIC_DB_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p${MAUTIC_DB_ROOT_PASSWORD}"]
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -u root -p${MAUTIC_DB_ROOT_PASSWORD}",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -1366,7 +1391,7 @@ services:
       retries: 5
 
   mautic_web:
-    image: mautic/mautic:latest    # Changed to latest (6.0)
+    image: mautic/mautic:latest # Changed to latest (6.0)
     container_name: mautic_web
     profiles: ["mautic"]
     restart: unless-stopped
@@ -1385,20 +1410,20 @@ services:
       - MAUTIC_DB_NAME=mautic
       - MAUTIC_DB_USER=${MAUTIC_DB_USER}
       - MAUTIC_DB_PASSWORD=${MAUTIC_DB_PASSWORD}
-      
+
       # Redis Cache
       - MAUTIC_REDIS_HOST=mautic_redis
       - MAUTIC_REDIS_PORT=6379
-      
+
       # Mautic Configuration
       - MAUTIC_ADMIN_EMAIL=${MAUTIC_ADMIN_EMAIL}
       - MAUTIC_ADMIN_PASSWORD=${MAUTIC_ADMIN_PASSWORD}
       - MAUTIC_TRUSTED_PROXIES=["0.0.0.0/0"]
       - MAUTIC_URL=https://${MAUTIC_HOSTNAME}
-      
+
       # Mail Configuration (using Mailpit)
       - MAUTIC_MAILER_DSN=smtp://mailpit:1025
-      
+
       # Performance Settings
       - PHP_MEMORY_LIMIT=512M
       - PHP_MAX_EXECUTION_TIME=300
@@ -1412,7 +1437,7 @@ services:
       start_period: 60s
 
   mautic_worker:
-    image: mautic/mautic:latest    # Changed to latest (6.0)
+    image: mautic/mautic:latest # Changed to latest (6.0)
     container_name: mautic_worker
     profiles: ["mautic"]
     restart: unless-stopped
@@ -1481,7 +1506,7 @@ services:
       - VIKUNJA_SERVICE_ENABLEREGISTRATION=true
       - VIKUNJA_SERVICE_ENABLETASKATTACHMENTS=true
       - VIKUNJA_SERVICE_MAXAVATARSIZE=1024
-      - VIKUNJA_SERVICE_MAXATTACHMENTSIZE=20971520  # 20MB
+      - VIKUNJA_SERVICE_MAXATTACHMENTSIZE=20971520 # 20MB
       # Optional: Set timezone
       - VIKUNJA_SERVICE_TIMEZONE=${TZ:-UTC}
     volumes:
@@ -1495,7 +1520,8 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3456/api/v1/info"]
+      test:
+        ["CMD", "wget", "-q", "--spider", "http://localhost:3456/api/v1/info"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1505,7 +1531,7 @@ services:
   mysql_leantime:
     image: mysql:8.4
     container_name: mysql_leantime
-    profiles: ["mysql"]  # This profile is auto-activated when leantime is selected
+    profiles: ["mysql"] # This profile is auto-activated when leantime is selected
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -1539,7 +1565,7 @@ services:
       - LEAN_APP_URL=https://${LEANTIME_HOSTNAME}
       - LEAN_SITENAME=Leantime
       - LEAN_SESSION_PASSWORD=${LEANTIME_SESSION_PASSWORD}
-      - LEAN_SESSION_EXPIRATION=28800  # 8 hours
+      - LEAN_SESSION_EXPIRATION=28800 # 8 hours
       - LEAN_DEFAULT_TIMEZONE=${TZ:-UTC}
       # Language & Theme
       - LEAN_LANGUAGE=en-US
@@ -1614,18 +1640,18 @@ services:
       # Database
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/calcom
       - DATABASE_DIRECT_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/calcom
-      
+
       # URLs
       - NEXT_PUBLIC_WEBAPP_URL=https://cal.${DOMAIN}
       - NEXT_PUBLIC_API_V2_URL=https://cal.${DOMAIN}/api/v2
       - NEXT_PUBLIC_WEBSITE_URL=https://cal.${DOMAIN}
       - NEXTAUTH_URL=https://cal.${DOMAIN}
       - CAL_URL=https://cal.${DOMAIN}
-      
+
       # Security
       - NEXTAUTH_SECRET=${CALCOM_NEXTAUTH_SECRET}
       - CALENDSO_ENCRYPTION_KEY=${CALCOM_ENCRYPTION_KEY}
-      
+
       # Email (using AI LaunchKit mail system and smtp-relay)
       - EMAIL_FROM=${EMAIL_FROM}
       - EMAIL_SERVER_HOST=smtp-relay
@@ -1634,7 +1660,7 @@ services:
       - EMAIL_SERVER_PASSWORD=${SMTP_PASSWORD:-}
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - SEND_FEEDBACK_EMAIL=false
-      
+
       # Features
       - NEXT_PUBLIC_DISABLE_SIGNUP=false
       - TELEMETRY_DISABLED=1
@@ -1650,18 +1676,19 @@ services:
     expose:
       - "3000"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      test:
+        ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 300s  # 5 minutes for build
+      start_period: 300s # 5 minutes for build
 
   # ============================================================================
   # MAIL SERVICES
   # Mailpit: Always active mail catcher for development/testing
   # Postal: Optional production mail server (activate via profile)
   # ============================================================================
-  
+
   # Mailpit - Mail Catcher (ALWAYS ACTIVE - NO PROFILE!)
   mailpit:
     image: axllent/mailpit:latest
@@ -1678,15 +1705,15 @@ services:
       MP_UI_AUTH_FILE: ${MAILPIT_UI_AUTH_FILE:-}
       MP_MAX_MESSAGES: ${MAILPIT_MAX_MESSAGES:-5000}
     expose:
-      - "1025"  # SMTP
-      - "8025"  # Web UI
+      - "1025" # SMTP
+      - "8025" # Web UI
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "1025"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-# Docker-Mailserver - Production email server
+  # Docker-Mailserver - Production email server
   mailserver:
     image: ghcr.io/docker-mailserver/docker-mailserver:latest
     container_name: mailserver
@@ -1694,14 +1721,14 @@ services:
     profiles: ["mailserver"]
     restart: unless-stopped
     ports:
-      - "25:25"     # SMTP (receiving)
-      - "587:587"   # SMTP (submission)
-      - "993:993"   # IMAP (optional, nur wenn User Mailboxen brauchen)
+      - "25:25" # SMTP (receiving)
+      - "587:587" # SMTP (submission)
+      - "993:993" # IMAP (optional, nur wenn User Mailboxen brauchen)
     volumes:
       - ./docker-data/dms/mail-data/:/var/mail/
       - ./docker-data/dms/mail-state/:/var/mail-state/
       - ./docker-data/dms/config/:/tmp/docker-mailserver/
-      - caddy-data:/certs/:ro  # Uses Caddy's Let's Encrypt Certificates
+      - caddy-data:/certs/:ro # Uses Caddy's Let's Encrypt Certificates
       - /etc/localtime:/etc/localtime:ro
       - ./shared:/data/shared
     environment:
@@ -1709,33 +1736,33 @@ services:
       - OVERRIDE_HOSTNAME=mail.${BASE_DOMAIN}
       - LOG_LEVEL=info
       - SUPERVISOR_LOGLEVEL=warn
-      
+
       # Network
       - PERMIT_DOCKER=network
       - NETWORK_INTERFACE=
-      
+
       # Security & SSL (Caddy Zertifikate nutzen)
       - SSL_TYPE=
       - SSL_CERT_PATH=/certs/certificates/acme-v02.api.letsencrypt.org-directory/${BASE_DOMAIN}/${BASE_DOMAIN}.crt
       - SSL_KEY_PATH=/certs/certificates/acme-v02.api.letsencrypt.org-directory/${BASE_DOMAIN}/${BASE_DOMAIN}.key
-      
+
       # Features
-      - ENABLE_RSPAMD=1          # Better than SpamAssassin
-      - ENABLE_CLAMAV=0          # Disabled by default (saves RAM)
-      - ENABLE_FAIL2BAN=1        # Brute-force protection
-      - ENABLE_POSTGREY=0        # Greylisting (optional)
-      - ENABLE_SASLAUTHD=0       # Not needed for basic setup
-      - ENABLE_SPAMASSASSIN=0    # Using Rspamd instead
-      - ENABLE_FETCHMAIL=0       # Not needed
-      - ENABLE_GETMAIL=0         # Not needed
-      - ENABLE_AMAVIS=0          # Not needed with Rspamd
-      
+      - ENABLE_RSPAMD=1 # Better than SpamAssassin
+      - ENABLE_CLAMAV=0 # Disabled by default (saves RAM)
+      - ENABLE_FAIL2BAN=1 # Brute-force protection
+      - ENABLE_POSTGREY=0 # Greylisting (optional)
+      - ENABLE_SASLAUTHD=0 # Not needed for basic setup
+      - ENABLE_SPAMASSASSIN=0 # Using Rspamd instead
+      - ENABLE_FETCHMAIL=0 # Not needed
+      - ENABLE_GETMAIL=0 # Not needed
+      - ENABLE_AMAVIS=0 # Not needed with Rspamd
+
       # Mail Settings
-      - ONE_DIR=1                # Better for Docker
+      - ONE_DIR=1 # Better for Docker
       - DMS_DEBUG=0
       - POSTMASTER_ADDRESS=postmaster@${BASE_DOMAIN}
-      - POSTFIX_MESSAGE_SIZE_LIMIT=20480000  # 20MB
-      
+      - POSTFIX_MESSAGE_SIZE_LIMIT=20480000 # 20MB
+
     cap_add:
       - NET_ADMIN
       - SYS_PTRACE
@@ -1745,7 +1772,7 @@ services:
       timeout: 10s
       retries: 3
     depends_on:
-      - caddy  # For SSL certificates
+      - caddy # For SSL certificates
 
   # SnappyMail Webmail Client (Latest 2025)
   snappymail:
@@ -1763,8 +1790,8 @@ services:
     depends_on:
       - mailserver
     expose:
-      - "8888"   # Main web interface
-      - "9000"   # PHP-FPM (optional)
+      - "8888" # Main web interface
+      - "9000" # PHP-FPM (optional)
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8888/"]
       interval: 30s
@@ -1886,7 +1913,7 @@ services:
   # ============================================================================
   # LIVEKIT - Real-time Voice & Video Infrastructure
   # ============================================================================
-  
+
   # LiveKit Server - WebRTC SFU and API
   livekit-server:
     image: livekit/livekit-server:latest
@@ -2078,7 +2105,17 @@ services:
       - MYSQL_ROOT_PASSWORD=${KIMAI_DB_ROOT_PASSWORD}
     command: --default-storage-engine=innodb --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${KIMAI_DB_ROOT_PASSWORD}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${KIMAI_DB_ROOT_PASSWORD}",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -2105,18 +2142,18 @@ services:
       - APP_CIPHER=AES-256-CBC
       - REQUIRE_HTTPS=false
       - TRUSTED_PROXIES=*
-      
+
       # Database Configuration
       - DB_HOST=invoiceninja_db
       - DB_PORT=3306
       - DB_DATABASE=${INVOICENINJA_DB_NAME:-invoiceninja}
       - DB_USERNAME=${INVOICENINJA_DB_USER:-invoiceninja}
       - DB_PASSWORD=${INVOICENINJA_DB_PASSWORD}
-      
+
       # Initial Admin Account
       - IN_USER_EMAIL=${INVOICENINJA_ADMIN_EMAIL:-${USER_EMAIL}}
       - IN_PASSWORD=${INVOICENINJA_ADMIN_PASSWORD}
-      
+
       # Mail Configuration
       - MAIL_MAILER=smtp
       - MAIL_HOST=${SMTP_HOST:-mailpit}
@@ -2126,11 +2163,11 @@ services:
       - MAIL_ENCRYPTION=${SMTP_ENCRYPTION:-null}
       - MAIL_FROM_ADDRESS=${INVOICENINJA_MAIL_FROM:-noreply@${BASE_DOMAIN}}
       - MAIL_FROM_NAME="Invoice Ninja"
-      
+
       # PDF Generation
       - PDF_GENERATOR=snappdf
       - SNAPPDF_EXECUTABLE_PATH=/usr/bin/chromium-browser
-      
+
       # Queue Configuration
       - QUEUE_CONNECTION=database
       - BROADCAST_DRIVER=log
@@ -2139,7 +2176,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_PORT=6379
-      
+
     depends_on:
       invoiceninja_db:
         condition: service_healthy
@@ -2166,7 +2203,17 @@ services:
       - MYSQL_ROOT_PASSWORD=${INVOICENINJA_DB_ROOT_PASSWORD}
     command: --default-storage-engine=innodb --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${INVOICENINJA_DB_ROOT_PASSWORD}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${INVOICENINJA_DB_ROOT_PASSWORD}",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -2188,7 +2235,7 @@ services:
   # ============================================================================
   # FORMBRICKS - Open Source Survey Platform (Typeform Alternative)
   # ============================================================================
-  
+
   # Database Init für Formbricks
   formbricks-init:
     image: postgres:${POSTGRES_VERSION:-17}
@@ -2209,7 +2256,7 @@ services:
   # ============================================================================
   # FORMBRICKS - Open Source Survey Platform (Typeform Alternative)
   # ============================================================================
-  
+
   # Dedicated PostgreSQL with pgvector for Formbricks
   formbricks_db:
     image: pgvector/pgvector:pg17
@@ -2241,7 +2288,7 @@ services:
       # Core Configuration
       - WEBAPP_URL=https://${FORMBRICKS_HOSTNAME}
       - NEXTAUTH_URL=https://${FORMBRICKS_HOSTNAME}
-      
+
       # Database - eigene PostgreSQL mit pgvector!
       - DATABASE_URL=postgresql://formbricks:${FORMBRICKS_DB_PASSWORD:-formbricks_secure_password}@formbricks_db:5432/formbricks?schema=public
       - NEXTAUTH_SECRET=${FORMBRICKS_NEXTAUTH_SECRET}
@@ -2264,14 +2311,15 @@ services:
       - DEFAULT_ORGANIZATION_ROLE=owner
       - REDIS_URL=redis://redis:6379
       - REDIS_HTTP_URL=redis://redis:6379
-      
+
     depends_on:
       formbricks_db:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/api/v1/health || exit 1"]
+      test:
+        ["CMD-SHELL", "curl -fsS http://localhost:3000/api/v1/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -2326,7 +2374,7 @@ services:
   # ============================================================================
   # OCR BUNDLE - Text Extraction from Images/PDFs
   # ============================================================================
-  
+
   # OCR Bundle - Tesseract (Fast Mode)
   tesseract-ocr:
     image: hertzg/tesseract-server:latest
@@ -2363,7 +2411,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 40s  # EasyOCR needs time to load models
+      start_period: 40s # EasyOCR needs time to load models
 
   # ============================================================================
   # STIRLING-PDF - Comprehensive PDF Tools Suite
@@ -2389,7 +2437,11 @@ services:
       - DISABLE_ADDITIONAL_FEATURES=false
       - LANGS=de-DE,en-GB,en-US
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v1/info/status | grep -q 'UP' || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:8080/api/v1/info/status | grep -q 'UP' || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -2439,7 +2491,7 @@ services:
   # ============================================================================
   # AI SECURITY SUITE - LLM Protection & GDPR-compliant PII Detection
   # ============================================================================
-  
+
   # LLM Guard - AI Security & Prompt Protection
   llm-guard:
     image: laiyer/llm-guard-api:latest
@@ -2507,7 +2559,13 @@ services:
     volumes:
       - ./shared:/data/shared
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health').raise_for_status()"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; requests.get('http://localhost:8000/health').raise_for_status()",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2518,7 +2576,7 @@ services:
   # ============================================================================
   # BROWSER AUTOMATION SUITE - Browserless + Skyvern + Browser-use
   # ============================================================================
-  
+
   # Browserless - Centralized Chrome Runtime
   browserless:
     image: ghcr.io/browserless/chromium:latest
@@ -2608,7 +2666,7 @@ services:
   # ============================================================================
   # N8N-MCP - Model Context Protocol for AI Workflow Generation
   # ============================================================================
-  
+
   # n8n-MCP - Model Context Protocol Server
   n8n-mcp:
     build:
@@ -2637,7 +2695,7 @@ services:
   # ============================================================================
   # AI RESEARCH TOOLS - GPT Researcher & Local Deep Research
   # ============================================================================
-  
+
   # GPT Researcher - Autonomous Research Agent (2000+ word reports)
   gpt-researcher:
     image: gptresearcher/gpt-researcher:latest
@@ -2652,7 +2710,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - LLM_PROVIDER=openai
       - FAST_LLM=openai:gpt-4o-mini
-      - SMART_LLM=openai:gpt-4o-mini  
+      - SMART_LLM=openai:gpt-4o-mini
       - STRATEGIC_LLM=openai:gpt-4o-mini
       - SUMMARY_LLM=openai:gpt-4o-mini
 
@@ -2665,7 +2723,7 @@ services:
       # - STRATEGIC_LLM=ollama/qwen2.5:7b-instruct-q4_K_M
       # - SUMMARY_LLM=ollama/qwen2.5:7b-instruct-q4_K_M
 
-      # Search & Report Configuration  
+      # Search & Report Configuration
       - RETRIEVER=${GPTR_RETRIEVER:-searx}
       - SEARX_URL=http://searxng:8080
       - REPORT_FORMAT=${GPTR_REPORT_FORMAT:-APA}
@@ -2673,7 +2731,7 @@ services:
       - TOTAL_WORDS=${GPTR_TOTAL_WORDS:-2000}
       - LANGUAGE=${GPTR_LANGUAGE:-english}
       - DOC_PATH=/usr/src/app/my-docs
-      
+
       # Server Configuration
       - HOST=0.0.0.0
       - PORT=8000
@@ -2682,7 +2740,11 @@ services:
     ports:
       - "8555:8000"
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/api/health || curl -fsS http://localhost:8000 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:8000/api/health || curl -fsS http://localhost:8000 || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -2719,21 +2781,25 @@ services:
       - LLM_PROVIDER=${LDR_LLM_PROVIDER:-ollama}
       - OLLAMA_BASE_URL=http://ollama:11434
       - LOCAL_LLM=${LDR_LOCAL_MODEL:-qwen2.5:7b-instruct-q4_K_M}
-      
+
       # Search Configuration (using existing SearXNG!)
       - SEARCH_API=${LDR_SEARCH_API:-searxng}
       - SEARXNG_URL=http://searxng:8080
       - MAX_WEB_RESEARCH_LOOPS=${LDR_MAX_LOOPS:-5}
       - FETCH_FULL_PAGE=${LDR_FETCH_FULL:-false}
-      
+
       # Optional API Keys
       - TAVILY_API_KEY=${TAVILY_API_KEY:-}
       - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY:-}
-      
+
       # Data Directory
       - LDR_DATA_DIR=/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:2024/health || curl -fsS http://localhost:2024 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:2024/health || curl -fsS http://localhost:2024 || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
