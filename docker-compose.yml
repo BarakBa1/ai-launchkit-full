@@ -335,9 +335,10 @@ services:
           "CMD-SHELL",
           "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1",
         ]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     ulimits:
       nofile:
         soft: 40000
