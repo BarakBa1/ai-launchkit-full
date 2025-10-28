@@ -227,6 +227,7 @@ services:
     environment:
       <<: *service-n8n-env
       RUN_N8N_IMPORT: ${RUN_N8N_IMPORT:-false}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
     entrypoint: /bin/sh
     command: /scripts/n8n_import_script.sh
     volumes:
@@ -288,7 +289,8 @@ services:
       - NODE_OPTIONS=--max-old-space-size=512
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-Europe/Berlin}
       - N8N_RUNNERS_PYTHON_ALLOW_BUILTIN=*
-      - N8N_RUNNERS_PYTHON_ALLOW_EXTERNAL=
+      - N8N_RUNNERS_PYTHON_ALLOW_EXTERNAL=*
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     volumes:
       - ./shared:/data/shared
       - ./n8n-task-runners.json:/etc/n8n-task-runners.json:ro
