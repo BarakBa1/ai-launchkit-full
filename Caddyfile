@@ -322,7 +322,7 @@ https://{$NEO4J_HOSTNAME}:7687 {
 
 # graphiti
 {$GRAPHITI_HOSTNAME} {
-    reverse_proxy graphiti:8090
+    reverse_proxy graphiti:8080
 }
 
 # =============================================================================

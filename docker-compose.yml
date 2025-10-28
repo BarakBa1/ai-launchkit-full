@@ -360,7 +360,7 @@ services:
     profiles: ["graphiti"]
     restart: unless-stopped
     # ports:
-    #   - "8090:8000"
+    #   - "8080:8000"
     environment:
       NEO4J_URI: bolt://neo4j:7687 #http://localhost:7474
       NEO4J_USER: ${NEO4J_AUTH_USERNAME}
@@ -632,7 +632,7 @@ services:
     image: miniflux/miniflux:latest
     profiles: ["miniflux"]
     # ports:
-    #   - "8088:8088"
+    #   - "8080:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -2769,8 +2769,8 @@ services:
       - PORT=8000
       - BACKEND_WS_MODE=none
     user: root
-    ports:
-      - "8555:8000"
+    # ports:
+    #   - "8555:8000"
     healthcheck:
       test:
         [
