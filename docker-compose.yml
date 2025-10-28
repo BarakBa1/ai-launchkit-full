@@ -352,7 +352,7 @@ services:
     ports:
       - "8090:8000"
     environment:
-      NEO4J_URI: http://localhost:7474
+      NEO4J_URI: bolt://neo4j:7687 #http://localhost:7474
       NEO4J_USER: ${NEO4J_AUTH_USERNAME}
       NEO4J_PASSWORD: ${NEO4J_AUTH_PASSWORD}
       OPENAI_API_KEY: ${OPENAI_API_KEY}

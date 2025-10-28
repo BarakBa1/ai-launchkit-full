@@ -1,7 +1,7 @@
-{
-    # Global options - works for both environments
-    email {$LETSENCRYPT_EMAIL}
-}
+# {
+#     # Global options - works for both environments
+#     email {$LETSENCRYPT_EMAIL}
+# }
 
 # Main Website (Base Domain)
 {$BASE_DOMAIN} {
