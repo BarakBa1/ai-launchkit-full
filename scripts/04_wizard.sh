@@ -51,27 +51,27 @@ current_profiles_for_matching=",$CURRENT_PROFILES_VALUE,"
 # Base service definitions (tag, description)
 base_services_data=(
     "n8n" "n8n, n8n-worker, n8n-import (Workflow Automation)"
-    "n8n-mcp" "n8n-MCP (AI workflow generation for Claude/Cursor)"
     "supabase" "Supabase (Backend as a Service)"
+    "qdrant" "Qdrant (Vector Database)"
+    "weaviate" "Weaviate (Vector Database with API Key Auth)"
     "neo4j" "Neo4j (Graph Database)"
     "graphiti" "Graphiti (Real-Time Knowledge Graphs for AI Agents)"
     "lightrag" "LightRAG (Graph-based RAG with entity extraction)"
-    "qdrant" "Qdrant (Vector Database)"
-    "weaviate" "Weaviate (Vector Database with API Key Auth)"
-    "searxng" "SearXNG (Private Metasearch Engine)"
-    "crawl4ai" "Crawl4ai (Web Crawler for AI)"
     "gpt-researcher" "GPT Researcher (Autonomous research agent - 2000+ word reports with citations)"
     "local-deep-research" "Local Deep Research (LangChain's iterative research - ~95% accuracy)"
+    "crawl4ai" "Crawl4ai (Web Crawler for AI)"
+    "searxng" "SearXNG (Private Metasearch Engine)"
     "miniflux" "Miniflux (Minimalist and opinionated feed reader)"
-    "python-runner" "Python Runner (Run your custom Python code from ./python-runner)"
     "langfuse" "Langfuse Suite (AI Observability - includes Clickhouse, Minio)"
     "monitoring" "Monitoring Suite (Prometheus, Grafana, cAdvisor, Node-Exporter)"
     "cloudflare-tunnel" "Cloudflare Tunnel (Zero-Trust Secure Access)"
+    "flowise" "Flowise (AI Agent Builder)"
+    "n8n-mcp" "n8n-MCP (AI workflow generation for Claude/Cursor)"
+    "python-runner" "Python Runner (Run your custom Python code from ./python-runner)"
     "portainer" "Portainer (Docker management UI)"
     "ai-security" "AI Security Suite - LLM Guard + Presidio (AI safety & GDPR-compliant PII)"
     "dify" "Dify (AI Application Development Platform with LLMOps)"
     "ragapp" "RAGApp (Open-source RAG UI + API)"
-    "flowise" "Flowise (AI Agent Builder)"
     "bolt" "bolt.diy (AI Web Development)"
     "perplexica" "Perplexica (Open-source Deep Resarch/Perplexity AI alternative)"
     "openui" "OpenUI (AI Frontend/UI Generator - EXPERIMENTAL, best with Claude/GPT-4)"
@@ -134,7 +134,7 @@ while [ $idx -lt ${#base_services_data[@]} ]; do
     else
         # .env has no COMPOSE_PROFILES or it's empty/just quotes, use hardcoded defaults
         case "$tag" in
-            "n8n"|"flowise"|"monitoring") status="ON" ;;
+            "n8n"|"neo4j"|"graphiti"|"qdrant"|"weaviate"|"searxng"|"crawl4ai"|"gpt-researcher"|"miniflux") status="ON" ;;
             *) status="OFF" ;;
         esac
     fi

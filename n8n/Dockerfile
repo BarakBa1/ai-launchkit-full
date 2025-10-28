@@ -16,7 +16,19 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 # Install n8n community nodes
-RUN npm install -g n8n-nodes-globals n8n-nodes-text-manipulation n8n-nodes-cronlytic n8n-nodes-youtube-transcript-api n8n-nodes-miniflux n8n-nodes-qdrant n8n-nodes-openrouter n8n-nodes-python n8n-nodes-perplexity n8n-nodes-searxng n8n-nodes-rss-feed-trigger n8n-nodes-neo4j
+RUN npm install -g \
+    n8n-nodes-globals \
+    n8n-nodes-text-manipulation \
+    n8n-nodes-cronlytic \
+    n8n-nodes-youtube-transcript-api \
+    n8n-nodes-miniflux \
+    n8n-nodes-neo4j || true
+    # n8n-nodes-qdrant \
+    # n8n-nodes-openrouter \
+    # n8n-nodes-python \
+    # n8n-nodes-perplexity \
+    # n8n-nodes-searxng \
+    # n8n-nodes-rss-feed-trigger \
 
 # Install Python libraries for advanced media processing
 RUN pip3 install --no-cache-dir --break-system-packages \
