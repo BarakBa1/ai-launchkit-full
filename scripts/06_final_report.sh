@@ -1419,6 +1419,15 @@ if is_profile_active "graphiti"; then
   echo "Host: ${GRAPHITI_HOSTNAME:-<hostname_not_set>}"
 fi
 
+if is_profile_active "miniflux"; then
+  echo
+  echo "================================= miniflux ================================"
+  echo
+  echo "Host: ${MINIFLUX_HOSTNAME:-<hostname_not_set>}"
+  echo "Admin Username: ${MINIFLUX_ADMIN_USERNAME:-<hostname_not_set>}"
+  echo "Admin Password: ${MINIFLUX_ADMIN_PASSWORD:-<not_set_in_env>}"
+fi
+
 # Standalone PostgreSQL (used by n8n, Langfuse, etc.)
 # Check if n8n or langfuse is active, as they use this PostgreSQL instance.
 # The Supabase section already details its own internal Postgres.

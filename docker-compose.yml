@@ -85,6 +85,7 @@ volumes:
   paperless_redis:
   paperless_data:
   paperless_media:
+  miniflux_data:
 
 x-n8n: &service-n8n
   build:
@@ -329,6 +330,11 @@ services:
       - ./neo4j/plugins:/plugins
     environment:
       - NEO4J_AUTH=${NEO4J_AUTH_USERNAME}/${NEO4J_AUTH_PASSWORD}
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_dbms_memory_heap_initial__size=1G
+      - NEO4J_dbms_memory_heap_max__size=2G
+      - NEO4J_dbms_memory_pagecache_size=1G
+      - NEO4J_PLUGINS=["apoc","graph-data-science"]
     healthcheck:
       test:
         [
@@ -410,7 +416,7 @@ services:
       - PERPLEXICA_PASSWORD_HASH=${PERPLEXICA_PASSWORD_HASH}
       - N8N_HOSTNAME=${N8N_HOSTNAME}
       - NEO4J_HOSTNAME=${NEO4J_HOSTNAME}
-        GRAPHITI_HOSTNAME=${GRAPHITI_HOSTNAME}
+      - GRAPHITI_HOSTNAME=${GRAPHITI_HOSTNAME}
       - PORTAINER_HOSTNAME=${PORTAINER_HOSTNAME}
       - POSTIZ_HOSTNAME=${POSTIZ_HOSTNAME}
       - PROMETHEUS_HOSTNAME=${PROMETHEUS_HOSTNAME}
@@ -455,6 +461,7 @@ services:
       - LDR_PASSWORD_HASH=${LDR_PASSWORD_HASH}
       - SEAFILE_HOSTNAME=${SEAFILE_HOSTNAME}
       - PAPERLESS_HOSTNAME=${PAPERLESS_HOSTNAME}
+      - MINIFLUX_HOSTNAME=${MINIFLUX_HOSTNAME}
       # Mail Services
       - MAILPIT_HOSTNAME=${MAILPIT_HOSTNAME}
       - MAILPIT_USERNAME=${MAILPIT_USERNAME}
@@ -606,7 +613,7 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 3s
+      interval: 5s
       timeout: 3s
       retries: 10
     environment:
@@ -615,6 +622,25 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - langfuse_postgres_data:/var/lib/postgresql/data
+      - miniflux_data:/var/lib/postgresql/data
+
+  miniflux:
+    image: miniflux/miniflux:latest
+    profiles: ["miniflux"]
+    ports:
+      - "80:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@db/postgres?sslmode=disable
+      - RUN_MIGRATIONS=1
+      - CREATE_ADMIN=1
+      - ADMIN_USERNAME=${MINIFLUX_ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${MINIFLUX_ADMIN_PASSWORD}
+      - BASE_URL=https://${MINIFLUX_HOSTNAME}
+    healthcheck:
+      test: ["CMD", "/usr/bin/miniflux", "-healthcheck", "auto"]
 
   redis:
     container_name: redis
@@ -636,8 +662,8 @@ services:
         max-file: "1"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 3s
       timeout: 10s
+      interval: 5s
       retries: 10
 
   # Baserow Database Init - Create database

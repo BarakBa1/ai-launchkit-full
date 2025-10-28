@@ -104,6 +104,11 @@
     reverse_proxy weaviate:8080
 }
 
+# Miniflux
+{$MINIFLUX_HOSTNAME} {
+    reverse_proxy miniflux:8088
+}
+
 # Qdrant
 {$QDRANT_HOSTNAME} {
     reverse_proxy qdrant:6333
