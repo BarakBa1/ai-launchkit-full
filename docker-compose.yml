@@ -357,8 +357,8 @@ services:
     container_name: graphiti
     profiles: ["graphiti"]
     restart: unless-stopped
-    ports:
-      - "8090:8000"
+    # ports:
+    #   - "8090:8000"
     environment:
       NEO4J_URI: bolt://neo4j:7687 #http://localhost:7474
       NEO4J_USER: ${NEO4J_AUTH_USERNAME}
@@ -629,8 +629,8 @@ services:
   miniflux:
     image: miniflux/miniflux:latest
     profiles: ["miniflux"]
-    ports:
-      - "80:8080"
+    # ports:
+    #   - "8088:8088"
     depends_on:
       postgres:
         condition: service_healthy
@@ -2755,7 +2755,7 @@ services:
 
       # Search & Report Configuration
       - RETRIEVER=${GPTR_RETRIEVER:-searx}
-      - SEARX_URL=http://searxng:8080
+      - SEARX_URL=http://{$SEARXNG_HOSTNAME}
       - REPORT_FORMAT=${GPTR_REPORT_FORMAT:-APA}
       - MAX_ITERATIONS=${GPTR_MAX_ITERATIONS:-5}
       - TOTAL_WORDS=${GPTR_TOTAL_WORDS:-2000}
