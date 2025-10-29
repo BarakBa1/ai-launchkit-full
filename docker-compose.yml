@@ -227,7 +227,6 @@ services:
     environment:
       <<: *service-n8n-env
       RUN_N8N_IMPORT: ${RUN_N8N_IMPORT:-false}
-      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
     entrypoint: /bin/sh
     command: /scripts/n8n_import_script.sh
     volumes:
@@ -242,6 +241,8 @@ services:
     container_name: n8n
     profiles: ["n8n"]
     restart: unless-stopped
+    environment: ### test addon to propegate N8N_ENCRYPTION_KEY
+      <<: *service-n8n-env
     volumes:
       - n8n_storage:/home/node/.n8n
       - ./n8n/backup:/backup
@@ -257,6 +258,8 @@ services:
     profiles: ["n8n"]
     restart: unless-stopped
     command: worker
+    environment: ### test addon to propegate N8N_ENCRYPTION_KEY
+      <<: *service-n8n-env
     volumes:
       - n8n_storage:/home/node/.n8n
       - ./shared:/data/shared
@@ -290,7 +293,6 @@ services:
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-Europe/Berlin}
       - N8N_RUNNERS_PYTHON_ALLOW_BUILTIN=*
       - N8N_RUNNERS_PYTHON_ALLOW_EXTERNAL=*
-      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
     volumes:
       - ./shared:/data/shared
       - ./n8n-task-runners.json:/etc/n8n-task-runners.json:ro
@@ -359,13 +361,14 @@ services:
     container_name: graphiti
     profiles: ["graphiti"]
     restart: unless-stopped
-    # ports:
-    #   - "8080:8000"
+    ports:
+      - "8080:8080"
     environment:
       NEO4J_URI: bolt://neo4j:7687 #http://localhost:7474
       NEO4J_USER: ${NEO4J_AUTH_USERNAME}
       NEO4J_PASSWORD: ${NEO4J_AUTH_PASSWORD}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      MODEL_NAME: gpt-4o-mini
     depends_on:
       neo4j:
         condition: service_healthy
@@ -631,8 +634,8 @@ services:
   miniflux:
     image: miniflux/miniflux:latest
     profiles: ["miniflux"]
-    # ports:
-    #   - "8080:8000"
+    ports:
+      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -643,6 +646,7 @@ services:
       - ADMIN_USERNAME=${MINIFLUX_ADMIN_USERNAME}
       - ADMIN_PASSWORD=${MINIFLUX_ADMIN_PASSWORD}
       - BASE_URL=https://${MINIFLUX_HOSTNAME}
+      - MEDIA_PROXY_ENABLED=1
     healthcheck:
       test: ["CMD", "/usr/bin/miniflux", "-healthcheck", "auto"]
 
@@ -2769,8 +2773,8 @@ services:
       - PORT=8000
       - BACKEND_WS_MODE=none
     user: root
-    # ports:
-    #   - "8555:8000"
+    ports:
+      - "8000:8000"
     healthcheck:
       test:
         [
