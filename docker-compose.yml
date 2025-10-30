@@ -631,24 +631,43 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - langfuse_postgres_data:/var/lib/postgresql/data
-
-  miniflux-db:
-    image: postgres:17-alpine
-    profiles: ["miniflux"]
-    container_name: miniflux-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: miniflux
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: miniflux
-    volumes:
       - miniflux_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "miniflux"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+
+  # miniflux-db:
+  #   image: postgres:17-alpine
+  #   profiles: ["miniflux"]
+  #   container_name: miniflux-db
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: miniflux
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: miniflux
+  #   volumes:
+  #     - miniflux_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD", "pg_isready", "-U", "miniflux"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 30s
+
+  # Miniflux Database Init - Create user and DB
+  miniflux-init:
+    image: postgres:${POSTGRES_VERSION:-17}
+    container_name: miniflux-init
+    profiles: ["miniflux"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    command: >
+      sh -c "
+      psql -h postgres -U postgres -c \"CREATE USER miniflux WITH PASSWORD '${MINIFLUX_ADMIN_PASSWORD}' CREATEDB\" || true &&
+      psql -h postgres -U postgres -c \"CREATE DATABASE miniflux OWNER miniflux\" || true &&
+      echo 'Miniflux user and database ready'
+      "
+    restart: "no"
 
   miniflux:
     image: miniflux/miniflux:latest
@@ -656,7 +675,8 @@ services:
     container_name: miniflux
     restart: unless-stopped
     environment:
-      - DATABASE_URL=postgres://miniflux:${POSTGRES_PASSWORD}@miniflux-db/miniflux?sslmode=disable
+      # DATABASE_URL=postgres://username:password@hostname/databasetoconnect?sslmode=disable
+      - DATABASE_URL=postgres://miniflux:${MINIFLUX_ADMIN_PASSWORD}@postgres/miniflux?sslmode=disable
       - RUN_MIGRATIONS=1
       - CREATE_ADMIN=1
       - ADMIN_USERNAME=${MINIFLUX_ADMIN_USERNAME}
@@ -664,8 +684,10 @@ services:
       - BASE_URL=https://${MINIFLUX_HOSTNAME}
       - MEDIA_PROXY_ENABLED=1
     depends_on:
-      miniflux-db:
-        condition: service_healthy
+      miniflux-init:
+        condition: service_completed_successfully
+      # miniflux-db:
+      #   condition: service_healthy
     healthcheck:
       test: ["CMD", "/usr/bin/miniflux", "-healthcheck", "auto"]
 
