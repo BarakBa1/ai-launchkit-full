@@ -651,7 +651,7 @@ services:
     image: miniflux/miniflux:latest
     profiles: ["miniflux"]
     depends_on:
-      postgres:
+      miniflux-db:
         condition: service_healthy
     environment:
       - DATABASE_URL=postgres://miniflux:${POSTGRES_PASSWORD}@miniflux-db/miniflux?sslmode=disable
