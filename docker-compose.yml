@@ -651,7 +651,7 @@ services:
   #     retries: 5
   #     start_period: 30s
 
-  # Miniflux Database Init - Create user and DB
+  # Miniflux Database Init - Create DB
   miniflux-init:
     image: postgres:${POSTGRES_VERSION:-17}
     container_name: miniflux-init
@@ -663,9 +663,8 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD}
     command: >
       sh -c "
-      psql -h postgres -U postgres -c \"CREATE USER miniflux WITH PASSWORD '${MINIFLUX_ADMIN_PASSWORD}' CREATEDB\" || true &&
-      psql -h postgres -U postgres -c \"CREATE DATABASE miniflux OWNER miniflux\" || true &&
-      echo 'Miniflux user and database ready'
+      psql -h postgres -U postgres -c \"CREATE DATABASE miniflux\" || true &&
+      echo 'Miniflux database ready'
       "
     restart: "no"
 
@@ -676,7 +675,7 @@ services:
     restart: unless-stopped
     environment:
       # DATABASE_URL=postgres://username:password@hostname/databasetoconnect?sslmode=disable
-      - DATABASE_URL=postgres://miniflux:${MINIFLUX_ADMIN_PASSWORD}@postgres/miniflux?sslmode=disable
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/miniflux?sslmode=disable
       - RUN_MIGRATIONS=1
       - CREATE_ADMIN=1
       - ADMIN_USERNAME=${MINIFLUX_ADMIN_USERNAME}
