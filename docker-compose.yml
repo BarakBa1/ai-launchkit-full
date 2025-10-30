@@ -621,16 +621,31 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: postgres
     volumes:
       - langfuse_postgres_data:/var/lib/postgresql/data
+
+  miniflux-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: miniflux
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: miniflux
+    volumes:
       - miniflux_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "miniflux"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   miniflux:
     image: miniflux/miniflux:latest
@@ -639,9 +654,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      # postgres://user:pass@localhost:port/dbname?sslmode=disable
-      # - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres/postgres?sslmode=disable
-      - DATABASE_URL=postgres://miniflux:${MINIFLUX_ADMIN_PASSWORD}@postgres:5432/miniflux?sslmode=disable
+      - DATABASE_URL=postgres://miniflux:${POSTGRES_PASSWORD}@miniflux-db/miniflux?sslmode=disable
       - RUN_MIGRATIONS=1
       - CREATE_ADMIN=1
       - ADMIN_USERNAME=${MINIFLUX_ADMIN_USERNAME}
@@ -1309,9 +1322,10 @@ services:
       - POSTGRES_DB=default
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${TWENTY_CRM_DB_USER}"]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 10s
       retries: 5
+      start_period: 30s
 
   twenty-redis:
     image: redis:7-alpine
@@ -2649,9 +2663,10 @@ services:
       - skyvern_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U skyvern"]
-      interval: 5s
-      timeout: 5s
+      interval: 30s
+      timeout: 10s
       retries: 5
+      start_period: 30s
 
   skyvern:
     image: public.ecr.aws/skyvern/skyvern:latest
@@ -2918,8 +2933,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U paperless"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 5
+      start_period: 30s
 
   paperless:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
