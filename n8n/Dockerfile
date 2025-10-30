@@ -13,6 +13,7 @@ RUN apk add --no-cache \
     py3-pip \
     nodejs \ 
     npm \
+    curl \
     && rm -rf /var/cache/apk/*
 
 # Install n8n community nodes

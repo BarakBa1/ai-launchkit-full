@@ -7,6 +7,7 @@ volumes:
   whisper-models:
   caddy-data:
   caddy-config:
+  caddy_logs:
   valkey-data:
   langfuse_postgres_data:
   langfuse_clickhouse_data:
@@ -361,8 +362,6 @@ services:
     container_name: graphiti
     profiles: ["graphiti"]
     restart: unless-stopped
-    ports:
-      - "8080:8080"
     environment:
       NEO4J_URI: bolt://neo4j:7687 #http://localhost:7474
       NEO4J_USER: ${NEO4J_AUTH_USERNAME}
@@ -379,14 +378,15 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "7687:7687"
+      # - "7687:7687" # API access to Neo4j
     restart: unless-stopped
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./caddy-addon:/etc/caddy/addons:ro
+      - ./website:/srv/website
       - caddy-data:/data:rw
       - caddy-config:/config:rw
-      - ./website:/srv/website
+      - caddy_logs:/var/log/caddy:rw
     environment:
       - BASE_DOMAIN=${BASE_DOMAIN}
       - COMFYUI_HOSTNAME=${COMFYUI_HOSTNAME}
@@ -437,6 +437,7 @@ services:
       - SEARXNG_PASSWORD_HASH=${SEARXNG_PASSWORD_HASH}
       - SEARXNG_USERNAME=${SEARXNG_USERNAME}
       - SUPABASE_HOSTNAME=${SUPABASE_HOSTNAME}
+      - POSTGRES_HOSTNAME=${POSTGRES_HOSTNAME}
       - TTS_AUTH_USER=${TTS_AUTH_USER}
       - TTS_AUTH_PASSWORD_HASH=${TTS_AUTH_PASSWORD_HASH}
       - TTS_HOSTNAME=${TTS_HOSTNAME}
@@ -634,13 +635,13 @@ services:
   miniflux:
     image: miniflux/miniflux:latest
     profiles: ["miniflux"]
-    ports:
-      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@db/postgres?sslmode=disable
+      # postgres://user:pass@localhost:port/dbname?sslmode=disable
+      # - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres/postgres?sslmode=disable
+      - DATABASE_URL=postgres://miniflux:${MINIFLUX_ADMIN_PASSWORD}@${POSTGRES_HOSTNAME}/miniflux?sslmode=disable
       - RUN_MIGRATIONS=1
       - CREATE_ADMIN=1
       - ADMIN_USERNAME=${MINIFLUX_ADMIN_USERNAME}
@@ -2769,17 +2770,15 @@ services:
       - DOC_PATH=/usr/src/app/my-docs
 
       # Server Configuration
-      - HOST=0.0.0.0
-      - PORT=8000
-      - BACKEND_WS_MODE=none
+      # - HOST=0.0.0.0
+      # - PORT=8000
+      # - BACKEND_WS_MODE=none
     user: root
-    ports:
-      - "8000:8000"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "curl -fsS http://localhost:8000/api/health || curl -fsS http://localhost:8000 || exit 1",
+          "curl -fsS https://${GPTR_HOSTNAME}/api/health || curl -fsS https://${GPTR_HOSTNAME} || exit 1",
         ]
       interval: 30s
       timeout: 10s

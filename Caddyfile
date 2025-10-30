@@ -71,6 +71,11 @@
     reverse_proxy kong:8000
 }
 
+# Postgres
+{$POSTGRES_HOSTNAME} {
+    reverse_proxy postgres:5432
+}
+
 # Grafana
 {$GRAFANA_HOSTNAME} {
     reverse_proxy grafana:3000
