@@ -437,7 +437,7 @@ services:
       - SEARXNG_PASSWORD_HASH=${SEARXNG_PASSWORD_HASH}
       - SEARXNG_USERNAME=${SEARXNG_USERNAME}
       - SUPABASE_HOSTNAME=${SUPABASE_HOSTNAME}
-      - POSTGRES_HOSTNAME=${POSTGRES_HOSTNAME}
+      # - POSTGRES_HOSTNAME=${POSTGRES_HOSTNAME}
       - TTS_AUTH_USER=${TTS_AUTH_USER}
       - TTS_AUTH_PASSWORD_HASH=${TTS_AUTH_PASSWORD_HASH}
       - TTS_HOSTNAME=${TTS_HOSTNAME}
@@ -641,7 +641,7 @@ services:
     environment:
       # postgres://user:pass@localhost:port/dbname?sslmode=disable
       # - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres/postgres?sslmode=disable
-      - DATABASE_URL=postgres://miniflux:${MINIFLUX_ADMIN_PASSWORD}@${POSTGRES_HOSTNAME}/miniflux?sslmode=disable
+      - DATABASE_URL=postgres://miniflux:${MINIFLUX_ADMIN_PASSWORD}@postgres:5432/miniflux?sslmode=disable
       - RUN_MIGRATIONS=1
       - CREATE_ADMIN=1
       - ADMIN_USERNAME=${MINIFLUX_ADMIN_USERNAME}
