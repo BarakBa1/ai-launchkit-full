@@ -634,6 +634,9 @@ services:
 
   miniflux-db:
     image: postgres:17-alpine
+    profiles: ["miniflux"]
+    container_name: miniflux-db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: miniflux
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -650,9 +653,8 @@ services:
   miniflux:
     image: miniflux/miniflux:latest
     profiles: ["miniflux"]
-    depends_on:
-      miniflux-db:
-        condition: service_healthy
+    container_name: miniflux
+    restart: unless-stopped
     environment:
       - DATABASE_URL=postgres://miniflux:${POSTGRES_PASSWORD}@miniflux-db/miniflux?sslmode=disable
       - RUN_MIGRATIONS=1
@@ -661,6 +663,9 @@ services:
       - ADMIN_PASSWORD=${MINIFLUX_ADMIN_PASSWORD}
       - BASE_URL=https://${MINIFLUX_HOSTNAME}
       - MEDIA_PROXY_ENABLED=1
+    depends_on:
+      miniflux-db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "/usr/bin/miniflux", "-healthcheck", "auto"]
 
@@ -2793,7 +2798,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl -fsS https://${GPTR_HOSTNAME}/api/health || curl -fsS https://${GPTR_HOSTNAME} || exit 1",
+          "curl -fsS http://${GPTR_HOSTNAME}/api/health || curl -fsS http://${GPTR_HOSTNAME} || exit 1",
         ]
       interval: 30s
       timeout: 10s
@@ -2809,7 +2814,7 @@ services:
     profiles: ["gpt-researcher"]
     restart: unless-stopped
     environment:
-      - NEXT_PUBLIC_GPTR_API_URL=https://${GPTR_HOSTNAME}
+      - NEXT_PUBLIC_GPTR_API_URL=http://${GPTR_HOSTNAME}
       - CHOKIDAR_USEPOLLING=true
       - LOGGING_LEVEL=INFO
     depends_on:
