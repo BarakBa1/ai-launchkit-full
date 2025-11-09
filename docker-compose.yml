@@ -369,7 +369,6 @@ services:
       NEO4J_URI: bolt://neo4j:7687 #http://localhost:7474
       NEO4J_USER: ${NEO4J_AUTH_USERNAME}
       NEO4J_PASSWORD: ${NEO4J_AUTH_PASSWORD}
-      DATABASE: neo4j
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       MODEL_NAME: gpt-5-mini
       SMALL_MODEL_NAME: gpt-5-nano
@@ -2110,7 +2109,7 @@ services:
       - .:/data/ai-launchkit:ro
     environment:
       # Repository encryption password (different from Nextcloud password!)
-      - KOPIA_PASSWORD=${KOPIA_PASSWORD}
+      - KOPIA_PASSWORD=CFT1CFT5 #${KOPIA_PASSWORD}
       # Web UI credentials
       - KOPIA_UI_USERNAME=${KOPIA_UI_USERNAME}
       - KOPIA_UI_PASSWORD=${KOPIA_UI_PASSWORD}
