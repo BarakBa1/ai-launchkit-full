@@ -150,7 +150,6 @@ x-init-ollama: &init-ollama
     - "sleep 3; OLLAMA_HOST=ollama:11434 ollama pull qwen2.5:7b-instruct-q4_K_M; OLLAMA_HOST=ollama:11434 ollama pull nomic-embed-text"
 
 services:
-
   flowise:
     image: flowiseai/flowise
     restart: unless-stopped
@@ -251,6 +250,8 @@ services:
       - ./shared:/data/shared
       - ./media:/data/media # <-- NEU hinzufügen
       - ./temp:/data/temp # <-- NEU hinzufügen
+    extra_hosts:
+      - host.docker.internal:host-gateway
     depends_on:
       n8n-import:
         condition: service_completed_successfully
@@ -276,6 +277,8 @@ services:
         condition: service_healthy
     deploy:
       replicas: ${N8N_WORKER_COUNT:-1}
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
   n8n-runner:
     image: n8nio/runners:${N8N_RUNNERS_VERSION}
@@ -309,6 +312,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
   qdrant:
     image: qdrant/qdrant
@@ -355,7 +360,8 @@ services:
         hard: 40000
 
   graphiti:
-    image: zepai/graphiti:latest
+    image: zepai/knowledge-graph-mcp:latest
+    # image: zepai/graphiti:latest
     container_name: graphiti
     profiles: ["graphiti"]
     restart: unless-stopped
@@ -364,7 +370,8 @@ services:
       NEO4J_USER: ${NEO4J_AUTH_USERNAME}
       NEO4J_PASSWORD: ${NEO4J_AUTH_PASSWORD}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      MODEL_NAME: gpt-4o-mini
+      MODEL_NAME: gpt-5-mini
+      SMALL_MODEL_NAME: gpt-5-nano
     depends_on:
       neo4j:
         condition: service_healthy
