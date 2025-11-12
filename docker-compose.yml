@@ -2101,6 +2101,8 @@ services:
       - kopia_config:/app/config
       - kopia_cache:/app/cache
       - kopia_logs:/app/logs
+      # Mount the entire host (read-only)
+      - /:/host:ro
       # Mount Docker volumes for backup (read-only)
       - /var/lib/docker/volumes:/data/docker-volumes:ro
       # Mount shared directory for backup (read-only)
