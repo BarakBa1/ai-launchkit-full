@@ -2111,7 +2111,7 @@ services:
       - .:/data/ai-launchkit:ro
     environment:
       # Repository encryption password (different from Nextcloud password!)
-      - KOPIA_PASSWORD=CFT1CFT5 #${KOPIA_PASSWORD}
+      - KOPIA_PASSWORD=${KOPIA_PASSWORD}
       # Web UI credentials
       - KOPIA_UI_USERNAME=${KOPIA_UI_USERNAME}
       - KOPIA_UI_PASSWORD=${KOPIA_UI_PASSWORD}

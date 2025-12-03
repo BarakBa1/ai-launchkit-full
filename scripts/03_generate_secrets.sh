@@ -88,7 +88,7 @@ declare -A VARS_TO_GENERATE=(
     ["JVB_AUTH_PASSWORD"]="password:32"
     ["VAULTWARDEN_ADMIN_TOKEN"]="apikey:64"
     ["KOPIA_UI_PASSWORD"]="password:32"
-    ["KOPIA_PASSWORD"]="password:32"
+    # ["KOPIA_PASSWORD"]="password:32"
     ["KIMAI_ADMIN_PASSWORD"]="password:32"
     ["KIMAI_DB_PASSWORD"]="password:32"
     ["KIMAI_DB_ROOT_PASSWORD"]="password:32"
@@ -274,6 +274,25 @@ else
             log_info "Please try entering the email address again."
         fi
     done
+fi
+
+# Prompt for Kopia password
+if [[ ! -v existing_env_vars[KOPIA_PASSWORD] || -z "${existing_env_vars[KOPIA_PASSWORD]}" ]]; then
+    echo ""
+    echo "Kopia Password (required)."
+fi
+
+if [[ -v existing_env_vars[KOPIA_PASSWORD] ]]; then # -v checks if variable is set (even if empty)
+    KOPIA_PASSWORD="${existing_env_vars[KOPIA_PASSWORD]}"
+    if [[ -n "$KOPIA_PASSWORD" ]]; then : # Fix: Add null command for empty 'then' block
+    else
+      log_info "Found empty Kopia password in .env. You can provide one now."
+      echo ""
+      read -p "Kopia Password: " KOPIA_PASSWORD # Allow update if it was empty
+    fi
+else
+    echo ""
+    read -p "Kopia Password: " KOPIA_PASSWORD
 fi
 
 # Prompt for OpenAI API key (optional)
@@ -643,6 +662,10 @@ generated_values["PAPERLESS_ADMIN_EMAIL"]="$USER_EMAIL"
 generated_values["MAILPIT_USERNAME"]="$USER_EMAIL"  # Set Mailpit username for Caddy
 generated_values["MINIFLUX_ADMIN_USERNAME"]="$USER_EMAIL"
 
+if [[ -n "$KOPIA_PASSWORD" ]]; then
+    generated_values["KOPIA_PASSWORD"]="$KOPIA_PASSWORD"
+fi
+
 if [[ -n "$OPENAI_API_KEY" ]]; then
     generated_values["OPENAI_API_KEY"]="$OPENAI_API_KEY"
 fi
@@ -720,6 +743,7 @@ found_vars["MAUTIC_ADMIN_EMAIL"]=0
 found_vars["MAUTIC_DB_USER"]=0
 found_vars["BASEROW_USERNAME"]=0
 found_vars["KOPIA_UI_USERNAME"]=0
+found_vars["KOPIA_PASSWORD"]=0
 found_vars["KIMAI_ADMIN_EMAIL"]=0
 found_vars["INVOICENINJA_ADMIN_EMAIL"]=0
 found_vars["GPTR_USERNAME"]=0
@@ -786,7 +810,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
             # This 'else' block is for lines from template not covered by existing values or VARS_TO_GENERATE.
             # Check if it is one of the user input vars - these are handled by found_vars later if not in template.
             is_user_input_var=0 # Reset for each line
-            user_input_vars=("FLOWISE_USERNAME" "DASHBOARD_USERNAME" "LETSENCRYPT_EMAIL" "RUN_N8N_IMPORT" "PROMETHEUS_USERNAME" "SEARXNG_USERNAME" "OPENAI_API_KEY" "LANGFUSE_INIT_USER_EMAIL" "N8N_WORKER_COUNT" "WEAVIATE_USERNAME" "NEO4J_AUTH_USERNAME" "COMFYUI_USERNAME" "RAGAPP_USERNAME" "LIBRETRANSLATE_USERNAME" "WHISPER_AUTH_USER" "TTS_AUTH_USER" "ODOO_USERNAME" "BASEROW_USERNAME" "KOPIA_UI_USERNAME" "GPTR_USERNAME" "MAILPIT_USERNAME" "MAUTIC_ADMIN_EMAIL" "MAUTIC_DB_USER" "INVOICENINJA_ADMIN_EMAIL" "SEAFILE_ADMIN_EMAIL" "PAPERLESS_ADMIN_EMAIL" "EMAIL_FROM" "EMAIL_SMTP" "EMAIL_SMTP_HOST" "EMAIL_SMTP_PORT" "EMAIL_SMTP_USER" "EMAIL_SMTP_PASSWORD" "EMAIL_SMTP_USE_TLS" "DOMAIN" "MINIFLUX_ADMIN_USERNAME")
+            user_input_vars=("FLOWISE_USERNAME" "DASHBOARD_USERNAME" "LETSENCRYPT_EMAIL" "RUN_N8N_IMPORT" "PROMETHEUS_USERNAME" "SEARXNG_USERNAME" "OPENAI_API_KEY" "LANGFUSE_INIT_USER_EMAIL" "N8N_WORKER_COUNT" "WEAVIATE_USERNAME" "NEO4J_AUTH_USERNAME" "COMFYUI_USERNAME" "RAGAPP_USERNAME" "LIBRETRANSLATE_USERNAME" "WHISPER_AUTH_USER" "TTS_AUTH_USER" "ODOO_USERNAME" "BASEROW_USERNAME" "KOPIA_UI_USERNAME" "GPTR_USERNAME" "MAILPIT_USERNAME" "MAUTIC_ADMIN_EMAIL" "MAUTIC_DB_USER" "INVOICENINJA_ADMIN_EMAIL" "SEAFILE_ADMIN_EMAIL" "PAPERLESS_ADMIN_EMAIL" "EMAIL_FROM" "EMAIL_SMTP" "EMAIL_SMTP_HOST" "EMAIL_SMTP_PORT" "EMAIL_SMTP_USER" "EMAIL_SMTP_PASSWORD" "EMAIL_SMTP_USE_TLS" "DOMAIN" "MINIFLUX_ADMIN_USERNAME" "KOPIA_PASSWORD")
             for uivar in "${user_input_vars[@]}"; do
                 if [[ "$varName" == "$uivar" ]]; then
                     is_user_input_var=1
@@ -868,7 +892,7 @@ if [[ -z "${generated_values[SERVICE_ROLE_KEY]}" ]]; then
 fi
 
 # Add any custom variables that weren't found in the template
-for var in "FLOWISE_USERNAME" "DASHBOARD_USERNAME" "LETSENCRYPT_EMAIL" "RUN_N8N_IMPORT" "OPENAI_API_KEY" "ANTHROPIC_API_KEY" "GROQ_API_KEY" "PROMETHEUS_USERNAME" "SEARXNG_USERNAME" "LANGFUSE_INIT_USER_EMAIL" "N8N_WORKER_COUNT" "WEAVIATE_USERNAME" "NEO4J_AUTH_USERNAME" "COMFYUI_USERNAME" "RAGAPP_USERNAME" "WHISPER_AUTH_USER" "TTS_AUTH_USER" "LIBRETRANSLATE_USERNAME" "LIGHTRAG_USERNAME" "PERPLEXICA_USERNAME" "ODOO_USERNAME" "BASEROW_USERNAME" "KOPIA_UI_USERNAME" "MAILPIT_USERNAME" "GPTR_USERNAME" "MAUTIC_ADMIN_EMAIL" "MAUTIC_DB_USER" "INVOICENINJA_ADMIN_EMAIL" "SEAFILE_ADMIN_EMAIL" "PAPERLESS_ADMIN_EMAIL" "EMAIL_FROM" "EMAIL_SMTP" "EMAIL_SMTP_HOST" "EMAIL_SMTP_PORT" "EMAIL_SMTP_USER" "EMAIL_SMTP_PASSWORD" "EMAIL_SMTP_USE_TLS" "DOMAIN" "MINIFLUX_ADMIN_USERNAME"; do
+for var in "FLOWISE_USERNAME" "DASHBOARD_USERNAME" "LETSENCRYPT_EMAIL" "RUN_N8N_IMPORT" "OPENAI_API_KEY" "ANTHROPIC_API_KEY" "GROQ_API_KEY" "PROMETHEUS_USERNAME" "SEARXNG_USERNAME" "LANGFUSE_INIT_USER_EMAIL" "N8N_WORKER_COUNT" "WEAVIATE_USERNAME" "NEO4J_AUTH_USERNAME" "COMFYUI_USERNAME" "RAGAPP_USERNAME" "WHISPER_AUTH_USER" "TTS_AUTH_USER" "LIBRETRANSLATE_USERNAME" "LIGHTRAG_USERNAME" "PERPLEXICA_USERNAME" "ODOO_USERNAME" "BASEROW_USERNAME" "KOPIA_UI_USERNAME" "MAILPIT_USERNAME" "GPTR_USERNAME" "MAUTIC_ADMIN_EMAIL" "MAUTIC_DB_USER" "INVOICENINJA_ADMIN_EMAIL" "SEAFILE_ADMIN_EMAIL" "PAPERLESS_ADMIN_EMAIL" "EMAIL_FROM" "EMAIL_SMTP" "EMAIL_SMTP_HOST" "EMAIL_SMTP_PORT" "EMAIL_SMTP_USER" "EMAIL_SMTP_PASSWORD" "EMAIL_SMTP_USE_TLS" "DOMAIN" "MINIFLUX_ADMIN_USERNAME" "KOPIA_PASSWORD"; do
     if [[ ${found_vars["$var"]} -eq 0 && -v generated_values["$var"] ]]; then
         # Before appending, check if it's already in TMP_ENV_FILE to avoid duplicates
         if ! grep -q -E "^${var}=" "$TMP_ENV_FILE"; then
