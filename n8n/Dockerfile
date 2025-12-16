@@ -1,4 +1,5 @@
-FROM n8nio/n8n:latest
+FROM n8nio/n8n:1.123.6
+# FROM n8nio/n8n:latest
 USER root
 
 # Install ffmpeg and enhanced media processing tools + nodejs & npm for n8n community nodes

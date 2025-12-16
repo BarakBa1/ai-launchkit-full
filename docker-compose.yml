@@ -343,9 +343,9 @@ services:
     profiles: ["neo4j"]
     restart: unless-stopped
     volumes:
+      - ./neo4j/data:/data
       - ./neo4j/logs:/logs
       - ./neo4j/config:/config
-      - ./neo4j/data:/data
       - ./neo4j/plugins:/plugins
     environment:
       - NEO4J_AUTH=${NEO4J_AUTH_USERNAME}/${NEO4J_AUTH_PASSWORD}
@@ -353,6 +353,9 @@ services:
       - NEO4J_dbms_memory_heap_initial__size=1G
       - NEO4J_dbms_memory_heap_max__size=2G
       - NEO4J_dbms_memory_pagecache_size=1G
+      - NEO4J_server_memory_heap_initial__size=512m
+      - NEO4J_server_memory_heap_max__size=1G
+      - NEO4J_server_memory_pagecache_size=512m
       - NEO4J_PLUGINS=["apoc","graph-data-science"]
     healthcheck:
       test:
@@ -379,6 +382,8 @@ services:
       NEO4J_URI: bolt://neo4j:7687 #http://localhost:7474
       NEO4J_USER: ${NEO4J_AUTH_USERNAME}
       NEO4J_PASSWORD: ${NEO4J_AUTH_PASSWORD}
+      GRAPHITI_GROUP_ID: "main"
+      SEMAPHORE_LIMIT: 5
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       MODEL_NAME: gpt-5-nano
       SMALL_MODEL_NAME: gpt-5-nano
