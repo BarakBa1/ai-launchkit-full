@@ -701,6 +701,13 @@ services:
       - ADMIN_PASSWORD=${MINIFLUX_ADMIN_PASSWORD}
       - BASE_URL=https://${MINIFLUX_HOSTNAME}
       - MEDIA_PROXY_ENABLED=1
+      - POLLING_SCHEDULER=round_robin #entry_frequency
+      - POLLING_FREQUENCY=5
+      - FORCE_REFRESH_INTERVAL=4
+      - SCHEDULER_ROUND_ROBIN_MIN_INTERVAL=4
+      - SCHEDULER_ROUND_ROBIN_MAX_INTERVAL=120
+      - SCHEDULER_ENTRY_FREQUENCY_MIN_INTERVAL=4
+      - SCHEDULER_ENTRY_FREQUENCY_MAX_INTERVAL=120
     depends_on:
       miniflux-init:
         condition: service_completed_successfully
